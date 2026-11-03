@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Analysis – FaceEmotion AI</title>
+  <meta name="description" content="Dataset analysis, training curves, confusion matrices and model comparison for facial emotion recognition."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <style>
+    .plot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+    .plot-full  { grid-column: 1 / -1; }
+    .plot-card  { padding: 1.5rem; }
+    .live-chart { width: 100%; height: 220px; border-radius: 8px; background: rgba(255,255,255,0.02); }
+    @media (max-width: 700px) { .plot-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/" class="nav-brand">
+    <div class="nav-logo">🧠</div>
+    <span class="nav-title">FaceEmotion AI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/analysis" class="active">Analysis</a></li>
+    <li><a href="/evaluation">Evaluation</a></li>
+  </ul>
+</nav>
+
+<main>
+  <section>
+    <div class="container-wide">
+
+      <div class="section-header" style="padding-top:2rem;">
+        <div class="section-tag">Data &amp; Training Analysis</div>
+        <h1 class="section-title">Model Analysis &amp; Visualizations</h1>
+        <p class="section-desc">
+          Detailed exploration of dataset distribution, training history,
+          confusion matrices and model comparison plots.
+        </p>
+      </div>
+
+      <!-- Status -->
+      <div class="status-bar" id="statusBar">
+        <div class="status-item"><span class="status-dot warn"></span><span>Loading...</span></div>
+      </div>
+
+      <!-- ── SECTION: DATASET ── -->
+      <h2 class="section-title" style="font-size:1.4rem;margin-bottom:1.5rem;">
+        📊 Dataset Overview
+      </h2>
+      <div class="plot-grid">
+        <div class="glass-card plot-card plot-full">
+          <div class="chart-title"><span class="dot"></span> Class Distribution</div>
+          <img class="chart-img" id="plotDistribution" src="/outputs/class_distribution.png" alt="Class Distribution"/>
+        </div>
+        <div class="glass-card plot-card plot-full">
+          <div class="chart-title"><span class="dot"></span> Sample Images per Emotion</div>
+          <img class="chart-img" id="plotSampleImgs" src="/outputs/sample_images.png" alt="Sample Images"/>
+        </div>
+      </div>
+
+      <!-- ── SECTION: TRAINING HISTORY ── -->
+      <h2 class="section-title" style="font-size:1.4rem;margin:2rem 0 1.5rem;">
+        📈 Training History
+      </h2>
+      <div class="plot-grid">
+        <!-- Static plots from training -->
+        <div class="glass-card plot-card">
+          <div class="chart-title"><span class="dot" style="background:var(--ann-color)"></span> ANN – Training History</div>
+          <img class="chart-img" id="plotAnnHistory" src="/outputs/ann_history.png" alt="ANN History"/>
+          <!-- Live canvas chart (shown if history.json exists) -->
+          <div id="annLiveCharts" style="margin-top:1rem;">
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem">Accuracy</div>
+            <canvas class="live-chart" id="annAccChart" width="600" height="220"></canvas>
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin:0.75rem 0 0.5rem">Loss</div>
+            <canvas class="live-chart" id="annLossChart" width="600" height="220"></canvas>
+          </div>
+        </div>
+        <div class="glass-card plot-card">
+          <div class="chart-title"><span class="dot" style="background:var(--cnn-color)"></span> CNN – Training History</div>
+          <img class="chart-img" id="plotCnnHistory" src="/outputs/cnn_history.png" alt="CNN History"/>
+          <div id="cnnLiveCharts" style="margin-top:1rem;">
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem">Accuracy</div>
+            <canvas class="live-chart" id="cnnAccChart" width="600" height="220"></canvas>
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin:0.75rem 0 0.5rem">Loss</div>
+            <canvas class="live-chart" id="cnnLossChart" width="600" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION: CONFUSION MATRICES ── -->
+      <h2 class="section-title" style="font-size:1.4rem;margin:2rem 0 1.5rem;">
+        🎯 Confusion Matrices
+      </h2>
+      <div class="plot-grid">
+        <div class="glass-card plot-card">
+          <div class="chart-title"><span class="dot" style="background:var(--ann-color)"></span> ANN Confusion Matrix</div>
+          <img class="chart-img" id="plotAnnCm" src="/outputs/ann_confusion_matrix.png" alt="ANN Confusion Matrix"/>
+        </div>
+        <div class="glass-card plot-card">
+          <div class="chart-title"><span class="dot" style="background:var(--cnn-color)"></span> CNN Confusion Matrix</div>
+          <img class="chart-img" id="plotCnnCm" src="/outputs/cnn_confusion_matrix.png" alt="CNN Confusion Matrix"/>
+        </div>
+      </div>
+
+      <!-- ── SECTION: COMPARISON ── -->
+      <h2 class="section-title" style="font-size:1.4rem;margin:2rem 0 1.5rem;">
+        ⚡ Model Comparison
+      </h2>
+      <div class="plot-grid">
+        <div class="glass-card plot-card">
+          <div class="chart-title"><span class="dot"></span> ANN vs CNN – Performance</div>
+          <img class="chart-img" id="plotComparison" src="/outputs/ann_vs_cnn_comparison.png" alt="ANN vs CNN Comparison"/>
+        </div>
+        <div class="glass-card plot-card">
+          <div class="chart-title"><span class="dot"></span> Training Time Comparison</div>
+          <img class="chart-img" id="plotTrainTime" src="/outputs/training_time_comparison.png" alt="Training Time"/>
+        </div>
+        <div class="glass-card plot-card plot-full">
+          <div class="chart-title"><span class="dot"></span> Sample Predictions</div>
+          <img class="chart-img" id="plotSamples" src="/outputs/sample_predictions.png" alt="Sample Predictions"/>
+        </div>
+      </div>
+
+      <!-- ── SECTION: KEY FINDINGS ── -->
+      <h2 class="section-title" style="font-size:1.4rem;margin:2rem 0 1.5rem;">
+        🔬 Key Findings
+      </h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-bottom:3rem;">
+        <div class="glass-card" style="padding:1.5rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.75rem;">🧠</div>
+          <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;margin-bottom:0.5rem;">CNN vs ANN</h3>
+          <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;">
+            CNN outperforms ANN because convolutional layers preserve spatial structure,
+            learning local edge, texture, and expression patterns directly from pixels.
+          </p>
+        </div>
+        <div class="glass-card" style="padding:1.5rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.75rem;">⚖️</div>
+          <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;margin-bottom:0.5rem;">Class Imbalance</h3>
+          <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;">
+            Happy has significantly more images than Disgust. Class weights and
+            data augmentation help balance training across all 7 emotion classes.
+          </p>
+        </div>
+        <div class="glass-card" style="padding:1.5rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.75rem;">📉</div>
+          <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;margin-bottom:0.5rem;">Overfitting Control</h3>
+          <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;">
+            Dropout, BatchNormalization, L2 regularization, and EarlyStopping
+            with best-weight restoration prevent overfitting on both models.
+          </p>
+        </div>
+        <div class="glass-card" style="padding:1.5rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.75rem;">🎯</div>
+          <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;margin-bottom:0.5rem;">Preprocessing Consistency</h3>
+          <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;">
+            Training and inference use identical preprocessing: grayscale,
+            64×64 resize, and [0,1] normalization to ensure reliable real-world predictions.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>Real-Time Facial Emotion Recognition · ANN &amp; CNN · Built with <span>❤</span> using TensorFlow, FastAPI &amp; OpenCV</p>
+  </div>
+</footer>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <span class="loading-text">Loading analysis data...</span>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/script.js"></script>
+<script>
+// Show live charts if static images failed
+document.querySelectorAll('.chart-img').forEach(img => {
+  img.addEventListener('load', function() {
+    // image loaded OK - show it, hide canvas
+    const canvasDiv = this.parentElement.querySelector('[id$="LiveCharts"]');
+    if (canvasDiv) canvasDiv.style.display = 'none';
+  });
+  img.addEventListener('error', function() {
+    // image failed - show canvas chart if available
+    const canvasDiv = this.parentElement.querySelector('[id$="LiveCharts"]');
+    if (canvasDiv) canvasDiv.style.display = 'block';
+    this.style.display = 'none';
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# Raw Dataset (~50k images)
+Image_data/
+
+# Python Virtual Environments
+venv/
+.venv/
+env/
+
+# Python Bytecode and Cache
+__pycache__/
+*.pyc
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# IDE and OS Specific Files
+.vscode/
+Thumbs.db
+desktop.ini
+.DS_Store

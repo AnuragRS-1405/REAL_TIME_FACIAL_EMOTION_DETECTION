@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Evaluation – FaceEmotion AI</title>
+  <meta name="description"
+    content="ANN vs CNN model evaluation: accuracy, precision, recall, F1-score comparison for facial emotion recognition." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    .radar-wrap {
+      position: relative;
+    }
+
+    .per-class-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .class-card {
+      padding: 1rem;
+      text-align: center;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+    }
+
+    .class-card .cls-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .class-card .cls-f1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .conclusion-box {
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(0, 212, 255, 0.05));
+      border: 1px solid rgba(108, 99, 255, 0.25);
+      border-radius: var(--radius-lg);
+      margin-top: 2rem;
+    }
+
+    .conclusion-box h3 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--accent-2);
+    }
+
+    .conclusion-box p {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 0.75rem;
+    }
+
+    .conclusion-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .winner-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(67, 233, 123, 0.1);
+      border: 1px solid rgba(67, 233, 123, 0.3);
+      border-radius: 50px;
+      margin-bottom: 1rem;
+    }
+
+    .winner-banner span {
+      color: var(--accent-4);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="/" class="nav-brand">
+      <div class="nav-logo">🧠</div>
+      <span class="nav-title">FaceEmotion AI</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/analysis">Analysis</a></li>
+      <li><a href="/evaluation" class="active">Evaluation</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section>
+      <div class="container">
+
+        <div class="section-header" style="padding-top:2rem;">
+          <div class="section-tag">Model Evaluation</div>
+          <h1 class="section-title">ANN vs CNN Performance</h1>
+          <p class="section-desc">
+            Both models evaluated on the same held-out test set.
+            Metrics include accuracy, precision, recall, F1-score and inference speed.
+          </p>
+        </div>
+
+        <!-- Status -->
+        <div class="status-bar" id="statusBar">
+          <div class="status-item"><span class="status-dot warn"></span><span>Loading metrics...</span></div>
+        </div>
+
+        <!-- ── METRICS SIDE BY SIDE ── -->
+        <div class="metrics-comparison">
+
+          <!-- ANN -->
+          <div class="glass-card metric-panel">
+            <div class="metric-panel-header">
+              <div class="model-badge ann">ANN</div>
+              <div style="font-size:0.85rem;color:var(--text-secondary)">Artificial Neural Network</div>
+            </div>
+            <div class="metric-accuracy ann-color" id="annAccuracy">—</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5rem;">Test Accuracy</div>
+
+            <div class="metric-list">
+              <div class="metric-row">
+                <span class="metric-name">Precision</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar ann" id="annPrecBar" data-width="0"></div>
+                </div>
+                <span class="metric-val" id="annPrecision">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-name">Recall</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar ann" id="annRecBar" data-width="0"></div>
+                </div>
+                <span class="metric-val" id="annRecall">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-name">F1-Score</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar ann" id="annF1Bar" data-width="0"></div>
+                </div>
+                <span class="metric-val" id="annF1">—</span>
+              </div>
+            </div>
+
+            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--glass-border);">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div>
+                  <div style="font-size:0.75rem;color:var(--text-secondary)">Train Time</div>
+                  <div style="font-weight:600" id="annTrainTime">—</div>
+                </div>
+                <div>
+                  <div style="font-size:0.75rem;color:var(--text-secondary)">Inference /img</div>
+                  <div style="font-weight:600" id="annInfTime">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CNN -->
+          <div class="glass-card metric-panel">
+            <div class="metric-panel-header">
+              <div class="model-badge cnn">CNN</div>
+              <div style="font-size:0.85rem;color:var(--text-secondary)">Convolutional Neural Network</div>
+            </div>
+            <div class="metric-accuracy cnn-color" id="cnnAccuracy">—</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1.5rem;">Test Accuracy</div>
+
+            <div class="metric-list">
+              <div class="metric-row">
+                <span class="metric-name">Precision</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar cnn" id="cnnPrecBar" data-width="0"></div>
+                </div>
+                <span class="metric-val" id="cnnPrecision">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-name">Recall</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar cnn" id="cnnRecBar" data-width="0"></div>
+                </div>
+                <span class="metric-val" id="cnnRecall">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-name">F1-Score</span>
+                <div class="metric-bar-wrap">
+                  <div class="metric-bar cnn" id="cnnF1Bar" data-width="0"></div>
+                </div>
+                <span class="metric-val" id="cnnF1">—</span>
+              </div>
+            </div>
+
+            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--glass-border);">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div>
+                  <div style="font-size:0.75rem;color:var(--text-secondary)">Train Time</div>
+                  <div style="font-weight:600" id="cnnTrainTime">—</div>
+                </div>
+                <div>
+                  <div style="font-size:0.75rem;color:var(--text-secondary)">Inference /img</div>
+                  <div style="font-weight:600" id="cnnInfTime">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── COMPARISON TABLE ── -->
+        <h2 class="section-title" style="font-size:1.4rem;margin-bottom:1.5rem;">
+          📋 Full Metrics Comparison
+        </h2>
+        <div class="glass-card" style="padding:1.5rem;margin-bottom:3rem;overflow-x:auto;">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th style="color:var(--ann-color)">ANN</th>
+                <th style="color:var(--cnn-color)">CNN</th>
+                <th>Winner</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTbody">
+              <tr>
+                <td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem;">
+                  Train models first to view metrics
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ── PER-CLASS PERFORMANCE ── -->
+        <h2 class="section-title" style="font-size:1.4rem;margin-bottom:0.5rem;">
+          🎯 Per-Class F1-Score
+        </h2>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">
+          F1-score per emotion class for each model.
+        </p>
+
+        <div class="glass-card" style="padding:1.5rem;margin-bottom:3rem;">
+          <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;">
+              <div style="width:12px;height:12px;border-radius:3px;background:var(--ann-color)"></div>ANN
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;">
+              <div style="width:12px;height:12px;border-radius:3px;background:var(--cnn-color)"></div>CNN
+            </div>
+          </div>
+          <canvas id="perClassChart" width="900" height="300" style="width:100%;max-width:900px;"></canvas>
+        </div>
+
+        <!-- ── CONCLUSION ── -->
+        <div class="conclusion-box">
+          <div class="winner-banner">
+            🏆 <span id="conclusionWinner">Train models to see conclusion</span>
+          </div>
+          <h3>Analytical Conclusion</h3>
+          <p id="conclusionText">
+            CNN is expected to outperform ANN for image-based emotion recognition
+            because convolutional layers preserve spatial information and learn local
+            facial features—edges, eye shape, eyebrow position, mouth curvature—
+            through hierarchical convolution operations.
+          </p>
+          <p>
+            ANN flattens the image into a 1D vector, discarding spatial relationships
+            between pixels. While this can still learn colour/intensity patterns,
+            it lacks the inductive bias needed for vision tasks and thus requires
+            more parameters to achieve comparable accuracy.
+          </p>
+          <p>
+            The CNN, with batch normalisation, dropout, and global average pooling,
+            provides better generalisation across all 7 emotion classes and a
+            more compact, deployable architecture.
+          </p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Real-Time Facial Emotion Recognition · ANN &amp; CNN · Built with <span>❤</span> using TensorFlow, FastAPI
+        &amp; OpenCV</p>
+    </div>
+  </footer>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <span class="loading-text">Loading metrics...</span>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script src="/static/js/script.js"></script>
+  <script>
+    // Per-class chart
+    async function drawPerClassChart(metrics) {
+      const canvas = document.getElementById('perClassChart');
+      if (!canvas || !metrics) return;
+      const ctx = canvas.getContext('2d');
+
+      const classes = ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise'];
+      const annReport = metrics.ann_report || {};
+      const cnnReport = metrics.cnn_report || {};
+
+      const annF1 = classes.map(c => annReport[c]?.['f1-score'] ?? 0);
+      const cnnF1 = classes.map(c => cnnReport[c]?.['f1-score'] ?? 0);
+
+      const W = canvas.width, H = canvas.height;
+      const pad = { top: 35, right: 25, bottom: 65, left: 55 };
+      const chartW = W - pad.left - pad.right;
+      const chartH = H - pad.top - pad.bottom;
+      const n = classes.length;
+      const groupW = chartW / n;
+      const barW = groupW * 0.32;
+
+      // Dark theme background
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, W, H);
+
+      // Grid
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.top + (i / 4) * chartH;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(((1 - i / 4) * 100).toFixed(0) + '%', pad.left - 8, y + 4);
+      }
+
+      function drawRoundedBar(x, y, w, h, radius, fillStyle, shadowColor) {
+        if (h <= 0) return;
+        ctx.save();
+        ctx.fillStyle = fillStyle;
+        if (shadowColor) {
+          ctx.shadowColor = shadowColor;
+          ctx.shadowBlur = 8;
+        }
+        ctx.beginPath();
+        const r = Math.min(radius, h / 2, w / 2);
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x, y + h);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      classes.forEach((cls, i) => {
+        const cx = pad.left + i * groupW + groupW / 2;
+        const annH = Math.max(4, annF1[i] * chartH);
+        const cnnH = Math.max(4, cnnF1[i] * chartH);
+
+        const annX = cx - barW - 3;
+        const annY = pad.top + chartH - annH;
+        const cnnX = cx + 3;
+        const cnnY = pad.top + chartH - cnnH;
+
+        // Draw ANN Bar (Neon Coral)
+        drawRoundedBar(annX, annY, barW, annH, 5, '#ff4b72', 'rgba(255,75,114,0.3)');
+
+        // Draw CNN Bar (Electric Cyan)
+        drawRoundedBar(cnnX, cnnY, barW, cnnH, 5, '#00f2fe', 'rgba(0,242,254,0.35)');
+
+        // Label
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(cls.charAt(0).toUpperCase() + cls.slice(1), cx, H - pad.bottom + 20);
+
+        // Values
+        ctx.font = '700 10px Rajdhani, sans-serif';
+        ctx.fillStyle = '#ff4b72';
+        if (annF1[i] > 0.05) {
+          ctx.fillText((annF1[i] * 100).toFixed(0) + '%', annX + barW / 2, annY - 5);
+        }
+        ctx.fillStyle = '#00f2fe';
+        if (cnnF1[i] > 0.05) {
+          ctx.fillText((cnnF1[i] * 100).toFixed(0) + '%', cnnX + barW / 2, cnnY - 5);
+        }
+      });
+    }
+
+    // Override initEvaluationPage to also draw per-class chart and conclusion
+    const _origInit = window.initEvaluationPage;
+    document.addEventListener('DOMContentLoaded', async () => {
+      // wait a tick for script.js DOMContentLoaded to fire first
+      setTimeout(async () => {
+        try {
+          const resp = await fetch(`${window.API || ''}/metrics`);
+          if (!resp.ok) return;
+          const data = await resp.json();
+          await drawPerClassChart(data);
+
+          // Conclusion
+          const annAcc = data.ann?.accuracy ?? 0;
+          const cnnAcc = data.cnn?.accuracy ?? 0;
+          const winner = cnnAcc >= annAcc ? 'CNN' : 'ANN';
+          const diff = Math.abs(cnnAcc - annAcc) * 100;
+          document.getElementById('conclusionWinner').textContent =
+            `${winner} wins by ${diff.toFixed(2)}% accuracy`;
+        } catch (e) { /* metrics not ready */ }
+      }, 500);
+    });
+  </script>
+</body>
+
+</html>

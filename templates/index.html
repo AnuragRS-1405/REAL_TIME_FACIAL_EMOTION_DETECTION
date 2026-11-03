@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FaceEmotion AI – Real-Time Facial Emotion Recognition</title>
+  <meta name="description" content="Real-time facial emotion recognition using ANN and CNN deep learning models. Detect 7 emotions from images."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+  <a href="/" class="nav-brand">
+    <div class="nav-logo">🧠</div>
+    <span class="nav-title">FaceEmotion AI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/" class="active">Home</a></li>
+    <li><a href="/analysis">Analysis</a></li>
+    <li><a href="/evaluation">Evaluation</a></li>
+  </ul>
+</nav>
+
+<main>
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+
+        <!-- LEFT: Info -->
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Deep Learning · ANN &amp; CNN
+          </div>
+          <h1 class="hero-title">
+            Real-Time<br/>
+            <span class="highlight">Facial Emotion</span><br/>
+            Recognition
+          </h1>
+          <p class="hero-subtitle">
+            An end-to-end deep learning system that detects 7 distinct human
+            emotions from facial images. Powered by both ANN and high-accuracy CNN
+            (91.7% accuracy)—select your preferred architecture and test your images instantly.
+          </p>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-value">7</div>
+              <div class="stat-label">Emotions</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">49K+</div>
+              <div class="stat-label">Images</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">2</div>
+              <div class="stat-label">Models</div>
+            </div>
+          </div>
+
+          <!-- Emotion Icons -->
+          <div class="emotion-grid">
+            <div class="emotion-card">
+              <span class="emotion-emoji">😠</span>
+              <span class="emotion-label">Angry</span>
+            </div>
+            <div class="emotion-card">
+              <span class="emotion-emoji">🤢</span>
+              <span class="emotion-label">Disgust</span>
+            </div>
+            <div class="emotion-card">
+              <span class="emotion-emoji">😨</span>
+              <span class="emotion-label">Fear</span>
+            </div>
+            <div class="emotion-card">
+              <span class="emotion-emoji">😊</span>
+              <span class="emotion-label">Happy</span>
+            </div>
+            <div class="emotion-card">
+              <span class="emotion-emoji">😐</span>
+              <span class="emotion-label">Neutral</span>
+            </div>
+            <div class="emotion-card">
+              <span class="emotion-emoji">😢</span>
+              <span class="emotion-label">Sad</span>
+            </div>
+            <div class="emotion-card">
+              <span class="emotion-emoji">😲</span>
+              <span class="emotion-label">Surprise</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Prediction Interface -->
+        <div>
+          <!-- Status Bar -->
+          <div class="status-bar" id="statusBar">
+            <div class="status-item">
+              <span class="status-dot warn"></span>
+              <span>Checking models...</span>
+            </div>
+          </div>
+
+          <!-- Predict Card -->
+          <div class="glass-card prediction-panel">
+            <div class="panel-header" style="margin-bottom:1.25rem;">
+              <h2 style="font-family:'Rajdhani',sans-serif;font-size:1.35rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
+                <span>📸</span> Image Emotion Classifier
+              </h2>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.25rem;">
+                Select your model architecture and upload a facial image to detect the emotion.
+              </p>
+            </div>
+
+            <!-- Model Selector -->
+            <div class="model-selector" style="margin-bottom:1.25rem;">
+              <button class="model-btn" data-model="ANN" id="modelANN">⚡ ANN (46.3% Acc)</button>
+              <button class="model-btn active" data-model="CNN" id="modelCNN">🔬 CNN (91.7% Acc — Recommended)</button>
+            </div>
+
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept="image/*"/>
+              <div class="upload-icon">📸</div>
+              <div class="upload-text">
+                <strong>Click to upload</strong> or drag &amp; drop<br/>
+                <small>JPG, PNG, BMP, WebP • Max 10MB</small>
+              </div>
+            </div>
+
+            <div class="preview-container" id="previewContainer">
+              <img class="preview-img" id="previewImg" alt="Preview"/>
+              <button class="preview-remove" id="removeBtn">✕</button>
+            </div>
+
+            <button class="btn-predict" id="predictBtn" disabled>
+              🚀 Predict Emotion
+            </button>
+          </div>
+
+          <!-- Result Area -->
+          <div class="glass-card result-panel" id="resultArea" style="display:none; margin-top:1.5rem;">
+            <span class="result-emoji" id="resultEmoji">🤔</span>
+            <div class="result-emotion" id="resultEmotion">—</div>
+            <p class="result-confidence" id="resultConfidence"></p>
+            <div class="confidence-bar-wrap">
+              <div class="confidence-bar" id="confidenceBar"></div>
+            </div>
+            <div style="margin-top:1.5rem;">
+              <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem;font-weight:600;">
+                All Emotion Probabilities
+              </div>
+              <div class="prob-list" id="probList"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section style="padding: 4rem 0;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Methodology</div>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-desc">
+          A complete end-to-end pipeline from raw image input to emotion prediction.
+        </p>
+      </div>
+      <div class="workflow-grid">
+        <div class="glass-card workflow-step fade-in-up">
+          <div class="step-num">1</div>
+          <div class="step-icon">📥</div>
+          <div class="step-title">Image Input</div>
+          <div class="step-desc">Upload a facial image in JPG, PNG, BMP, or WebP format</div>
+        </div>
+        <div class="glass-card workflow-step fade-in-up">
+          <div class="step-num">2</div>
+          <div class="step-icon">🔍</div>
+          <div class="step-title">Face Detection</div>
+          <div class="step-desc">Haar Cascade detects and crops the primary face region</div>
+        </div>
+        <div class="glass-card workflow-step fade-in-up">
+          <div class="step-num">3</div>
+          <div class="step-icon">⚙️</div>
+          <div class="step-title">Preprocessing</div>
+          <div class="step-desc">Resize to 64×64, convert to grayscale, normalize to [0,1]</div>
+        </div>
+        <div class="glass-card workflow-step fade-in-up">
+          <div class="step-num">4</div>
+          <div class="step-icon">🧠</div>
+          <div class="step-title">Model Inference</div>
+          <div class="step-desc">ANN or CNN predicts probability for each of 7 emotion classes</div>
+        </div>
+        <div class="glass-card workflow-step fade-in-up">
+          <div class="step-num">5</div>
+          <div class="step-icon">📊</div>
+          <div class="step-title">Output Result</div>
+          <div class="step-desc">Predicted emotion + confidence score displayed instantly</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="container">
+    <p>Real-Time Facial Emotion Recognition · ANN &amp; CNN · Built with <span>❤</span> using TensorFlow, FastAPI &amp; OpenCV</p>
+  </div>
+</footer>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <span class="loading-text">Analysing...</span>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/script.js"></script>
+</body>
+</html>
